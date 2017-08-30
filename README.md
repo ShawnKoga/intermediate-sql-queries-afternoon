@@ -40,6 +40,52 @@ SELECT a.Name, b.Name FROM SomeTable a JOIN AnotherTable b ON a.someid = b.somei
 8. Get all Track `Name`s and Album `Title`s that are the genre `"Alternative"` ( 2 joins ).
 
 ### Solution
+1. SELECT *
+FROM Invoice
+JOIN InvoiceLine ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+WHERE UnitPrice > 0.99
+
+2. SELECT Invoice.InvoiceDate, Customer.FirstName, Customer.LastName, Invoice.Total
+FROM Invoice
+JOIN Customer ON Invoice.CustomerId = Customer.CustomerId
+
+3. SELECT C.FirstName CustFirst, C.LastName CustLast, E.FirstName EmpFirst, E.LastName EmpLast
+FROM Customer C
+JOIN Employee E ON E.EmployeeId = C.SupportRepId
+
+4. SELECT Album.Title, Artist.Name
+FROM Album
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+
+5. SELECT PlaylistTrack.TrackId
+FROM PlaylistTrack
+JOIN Playlist ON Playlist.PlaylistId = PlaylistTrack.PlaylistId
+WHERE Playlist.Name = 'Music'
+
+6. SELECT Track.Name
+FROM Track
+JOIN PlaylistTrack ON PlaylistTrack.TrackId = Track.TrackId
+WHERE PlaylistTrack.PlaylistId = 5
+
+7. SELECT Track.Name, Playlist.Name
+FROM Track
+JOIN PlaylistTrack ON PlaylistTrack.TrackId = Track.TrackId
+JOIN Playlist ON Playlist.PlaylistId = PlaylistTrack.PlaylistId
+
+8. SELECT Track.Name, Album.Title
+FROM Album
+JOIN Track ON Album.AlbumId = Track.AlbumId
+JOIN Genre ON Track.GenreId = Genre.GenreId
+WHERE Genre.Name = 'Alternative'
+
+                                            9. BLACK DIAMOND
+                                            SELECT Track.Name Track, Album.Title Album, Genre.Name Genre, Artist.Name Artist
+                                            FROM Track
+                                            JOIN PlaylistTrack ON Track.TrackId = PlaylistTrack.TrackId
+                                            JOIN Playlist ON Playlist.PlaylistId = PlaylistTrack.PlaylistId
+                                            JOIN Album ON Track.AlbumId = Album.AlbumId
+                                            JOIN Artist ON Album.ArtistId = Artist.ArtistId
+                                            JOIN Genre ON Genre.GenreId = Title.GenreId
 
 <details>
 
@@ -188,6 +234,44 @@ SELECT Name, Email FROM Athlete WHERE AthleteId IN ( SELECT PersonId FROM PieEat
 
 ### Solution
 
+1. SELECT *
+FROM Invoice
+WHERE InvoiceId IN (SELECT InvoiceId
+FROM InvoiceLine
+WHERE UnitPrice > 0.99)
+
+2. SELECT *
+FROM PlaylistTrack
+WHERE PlaylistId = (SELECT PlaylistId
+					FROM Playlist
+					WHERE Name = 'Music')
+
+3. SELECT Name
+FROM Track
+WHERE TrackId IN (SELECT TrackId
+					FROM PlaylistTrack
+					WHERE PlaylistId = 5)
+
+4. SELECT *
+FROM Track
+WHERE GenreId IN (SELECT GenreId
+					FROM Genre
+					WHERE Name = 'Comedy')
+
+5. SELECT *
+FROM Track
+WHERE AlbumId IN (SELECT AlbumId
+					FROM Album
+					WHERE Title = 'Fireball')
+
+6. SELECT *
+FROM Track
+Where AlbumId IN (SELECT AlbumId
+                  FROM Album
+                  WHERE ArtistId IN (SELECT ArtistId
+                                      FROM Artist
+                                      WHERE Name = 'Queen'))
+
 <details>
 
 <summary> <code> SQL Solutions </code> </summary>
@@ -299,6 +383,29 @@ UPDATE Athletes SET sport = 'Picklball' WHERE sport = 'pockleball';
 
 ### Solution
 
+1. UPDATE Customer
+SET Fax = null
+WHERE Fax IS NOT null;
+
+2. UPDATE Customer
+SET Company = 'Self'
+WHERE Company IS null;
+
+3. UPDATE Customer
+SET LastName = 'Thompson'
+WHERE FirstName = 'Julia' AND LastName = 'Barnett';
+
+4. UPDATE Customer
+SET SupportRepId = 4
+WHERE Email = 'luisrojas@yahoo.cl';
+
+5. UPDATE Track
+SET Composer = 'The darkness around us'
+WHERE GenreId = (SELECT GenreID
+                 FROM Genre
+                 WHERE Name = 'Metal')
+AND Composer IS null;
+
 <details>
 
 <summary> <code> SQL Solutions </code> </summary>
@@ -390,6 +497,22 @@ GROUP BY [Column];
 
 ### Solution
 
+1. SELECT COUNT(*), Genre.Name
+FROM Track
+JOIN Genre ON Genre.GenreId = Track.GenreId
+GROUP BY Genre.Name
+
+2. SELECT COUNT(*), Genre.Name
+FROM Track
+JOIN Genre ON Genre.GenreId = Track.GenreId
+GROUP BY Genre.Name
+HAVING Genre.Name IN ('Pop', 'Rock')
+
+3. SELECT COUNT(*), Artist.Name
+FROM Album
+JOIN Artist ON Artist.ArtistId = Album.ArtistId
+GROUP BY Artist.Name
+
 <details>
 
 <summary> <code> SQL Solutions </code> </summary>
@@ -452,8 +575,16 @@ FROM [Table];
 <br />
 
 1. From the `Track` table find a unique list of all `Composer`s.
+SELECT DISTINCT Composer
+FROM Track
+
 2. From the `Invoice` table find a unique list of all `BillingPostalCode`s.
+SELECT DISTINCT BillingPostalCode
+FROM Invoice
+
 3. From the `Customer` table find a unique list of all `Company`s.
+SELECT DISTINCT Company
+FROM Customer
 
 <details>
 
@@ -541,6 +672,17 @@ DELETE FROM [Table] WHERE [Condition]
 4. Delete all entries whose value is equal to `150`.
 
 ### Solution
+1. Done
+
+2. DELETE FROM practice_delete
+WHERE Type = 'bronze'
+
+3. DELETE FROM practice_delete
+WHERE Type = 'silver'
+
+4. DELETE FROM practice_delete
+WHERE Value = 150
+
 
 <details>
 
@@ -599,21 +741,100 @@ Let's simulate an e-commerce site. We're going to need users, products, and orde
 ### Instructions
 
 * Create 3 tables following the criteria in the summary.
+CREATE TABLE Users (
+  userId INTEGER PRIMARY KEY,
+  name TEXT,
+  email TEXT
+);
+
+CREATE TABLE Products (
+  productId INTEGER PRIMARY KEY,
+  name TEXT,
+  price DECIMAL
+);
+
+CREATE TABLE Orders (
+  orderId INTEGER PRIMARY KEY,
+  productId INTEGER REFERENCES Products
+);
+
 * Add some data to fill up each table.
   * At least 3 users, 3 products, 3 orders.
+INSERT INTO Users
+(name, email)
+VALUES
+('Shawn', 'shawn@shawn.com'),
+('Alec', 'alec@alec.com'),
+('Ben', 'ben@ben.com');
+
+INSERT INTO Products
+(name, price)
+VALUES
+('shoes', 19.99),
+('hat', 9.99),
+('laptop', 999.99);
+
+INSERT INTO Orders
+(productId)
+VALUES
+(3),
+(2),
+(1);
+
 * Run queries against your data.
   * Get all products for the first order.
+SELECT Products.name
+FROM Orders
+JOIN Products ON Orders.ProductId = Products.ProductId
+WHERE Orders.OrderId = 1
+
   * Get all orders.
+SELECT *
+FROM Orders
+
   * Get the total cost of an order ( sum the price of all products on an order ).
+SELECT sum(Products.price)
+FROM Orders
+JOIN Products ON (Orders.productId = Products.productId)
+WHERE orderID = 2;
+
 * Add a foreign key reference from Orders to Users.
+ALTER TABLE Users
+ADD COLUMN orderId INTEGER REFERENCES Orders
+
 * Update the Orders table to link a user to each order.
+UPDATE Users
+SET orderId = 3
+WHERE userId = 1;
+
+UPDATE Users
+SET orderId = 2
+WHERE userId = 3;
+
+UPDATE Users
+SET orderId = 1
+WHERE userId = 2;
+
 * Run queries against your data.
   * Get all orders for a user.
+SELECT *
+FROM Orders
+JOIN Users ON Users.orderId = Orders.orderId
+WHERE Users.userID = 1
+
   * Get how many orders each user has.
+SELECT count(Orders.orderId)
+FROM Users
+JOIN Orders ON Users.orderId = Orders.orderId
 
 ### Black Diamond
 
 * Get the total amount on all orders for each user.
+SELECT sum(price)
+FROM Users
+JOIN Orders ON Users.orderId = Orders.orderId
+JOIN Products ON Products.productId = Orders.orderId
+GROUP BY Users.userId
 
 ## Contributions
 
